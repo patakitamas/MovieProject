@@ -7,17 +7,17 @@ namespace MovieProject.API.Controllers
     [Route("api/[controller]")]
     public class MovieQueryController : ControllerBase
     {
-        private readonly IMovieRepository _movieRepository;
+        private readonly IMovieRepository movieRepository;
 
         public MovieQueryController(IMovieRepository movieRepository)
         {
-            _movieRepository = movieRepository;
+            movieRepository = movieRepository;
         }
 
         [HttpGet("by-director")]
         public IActionResult GetMoviesByDirector([FromQuery] string director)
         {
-            var movies = (from m in _movieRepository.GetAll()
+            var movies = (from m in movieRepository.GetAll()
                           where m.Director == director
                           select m).ToList();
             return Ok(movies);
@@ -26,7 +26,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("released-in-year")]
         public IActionResult GetMoviesReleasedInYear([FromQuery] int year)
         {
-            var movies = _movieRepository.GetAll()
+            var movies = movieRepository.GetAll()
                 .Where(m => m.ReleaseYear == year)
                 .ToList();
             return Ok(movies);
@@ -35,7 +35,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("by-genre")]
         public IActionResult GetMoviesByGenre([FromQuery] string genre)
         {
-            var movies = (from m in _movieRepository.GetAll()
+            var movies = (from m in movieRepository.GetAll()
                           where m.Genre == genre
                           select m).ToList();
             return Ok(movies);
@@ -44,7 +44,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("highly-rated")]
         public IActionResult GetHighlyRatedMovies([FromQuery] decimal minRating = 8.5M)
         {
-            var movies = _movieRepository.GetAll()
+            var movies = movieRepository.GetAll()
                 .Where(m => m.Rating > minRating)
                 .ToList();
             return Ok(movies);
@@ -53,7 +53,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("top-rated")]
         public IActionResult GetTopRatedMovies([FromQuery] int count = 5)
         {
-            var movies = (from m in _movieRepository.GetAll()
+            var movies = (from m in movieRepository.GetAll()
                           orderby m.Rating descending
                           select m).Take(count).ToList();
 
@@ -63,7 +63,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("released-between")]
         public IActionResult GetMoviesReleasedBetween([FromQuery] int startYear, [FromQuery] int endYear)
         {
-            var movies = _movieRepository.GetAll()
+            var movies = movieRepository.GetAll()
                 .Where(m => m.ReleaseYear >= startYear && m.ReleaseYear <= endYear)
                 .ToList();
             return Ok(movies);
@@ -72,7 +72,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("action-highly-rated")]
         public IActionResult GetActionMoviesWithHighRating()
         {
-            var movies = (from m in _movieRepository.GetAll()
+            var movies = (from m in movieRepository.GetAll()
                           where m.Genre == "Action" && m.Rating > 8.0M
                           select m).ToList();
             return Ok(movies);
@@ -81,7 +81,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("sorted")]
         public IActionResult GetSortedMovies()
         {
-            var movies = _movieRepository.GetAll()
+            var movies = movieRepository.GetAll()
                 .OrderBy(m => m.ReleaseYear)
                 .ThenByDescending(m => m.Rating)
                 .ToList();
@@ -91,7 +91,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("count-by-genre")]
         public IActionResult GetMovieCountsByGenre()
         {
-            var counts = (from m in _movieRepository.GetAll()
+            var counts = (from m in movieRepository.GetAll()
                           group m by m.Genre into g
                           select new { Genre = g.Key, Count = g.Count() }).ToList();
             return Ok(counts);
@@ -100,7 +100,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("top-tarantino")]
         public IActionResult GetTopTarantinoMovies([FromQuery] int count = 3)
         {
-            var movies = _movieRepository.GetAll()
+            var movies = movieRepository.GetAll()
                 .Where(m => m.Director == "Quentin Tarantino")
                 .OrderByDescending(m => m.Rating)
                 .Take(count)
@@ -111,7 +111,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("average-rating-by-genre")]
         public IActionResult GetAverageRatingByGenre()
         {
-            var averages = _movieRepository.GetAll()
+            var averages = movieRepository.GetAll()
                 .GroupBy(m => m.Genre)
                 .Select(g => new { Genre = g.Key, AverageRating = g.Average(m => m.Rating) })
                 .ToList();
@@ -121,7 +121,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("nineties-highly-rated")]
         public IActionResult GetNinetiesHighlyRatedMovies()
         {
-            var movies = (from m in _movieRepository.GetAll()
+            var movies = (from m in movieRepository.GetAll()
                           where m.ReleaseYear >= 1990 && m.ReleaseYear <= 1999 && m.Rating > 8.0M
                           select m).ToList();
             return Ok(movies);
@@ -130,7 +130,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("king-high-rated")]
         public IActionResult GetKingMovies()
         {
-            var movies = _movieRepository.GetAll()
+            var movies = movieRepository.GetAll()
                 .Where(m => m.Title.Contains("King") && m.Rating > 8.5M)
                 .ToList();
             return Ok(movies);
@@ -139,7 +139,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("top-per-genre")]
         public IActionResult GetTopMoviesByGenre([FromQuery] int count = 5)
         {
-            var movies = _movieRepository.GetAll()
+            var movies = movieRepository.GetAll()
                 .AsEnumerable()
                 .GroupBy(m => m.Genre)
                 .SelectMany(g => g
@@ -153,7 +153,7 @@ namespace MovieProject.API.Controllers
         [HttpGet("nolan-above-average")]
         public IActionResult GetNolanAboveAverageMovies()
         {
-            var allMovies = _movieRepository.GetAll();
+            var allMovies = movieRepository.GetAll();
             var averageRating = allMovies.Average(m => m.Rating);
             var movies = allMovies
                 .Where(m => m.Director == "Christopher Nolan" && m.Rating > averageRating)
